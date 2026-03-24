@@ -1,0 +1,1358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Circuit RP (Public) Business Registry</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #0a0b0d;
+    --surface: #111318;
+    --surface2: #181b22;
+    --border: #23272f;
+    --accent: #e8c84a;
+    --accent2: #4ae8a0;
+    --danger: #e84a4a;
+    --warning: #e8954a;
+    --text: #e8eaf0;
+    --muted: #6b7280;
+    --strike1: #e8954a;
+    --strike2: #e84a4a;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Barlow', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* HEADER */
+  header {
+    background: var(--surface);
+    border-bottom: 2px solid var(--accent);
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.8rem;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+  }
+  .logo span { color: var(--text); }
+  nav { display: flex; gap: 0.25rem; }
+  .nav-btn {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-family: 'Barlow', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.15s;
+  }
+  .nav-btn:hover { color: var(--text); background: var(--surface2); }
+  .nav-btn.active { color: var(--accent); background: rgba(232,200,74,0.08); }
+
+  /* LAYOUT */
+  main { max-width: 1300px; margin: 0 auto; padding: 2rem; }
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* PAGE HEADER */
+  .page-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+    padding: 1.25rem 2rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+    position: sticky;
+    top: 64px;
+    z-index: 90;
+    margin-left: -2rem;
+    margin-right: -2rem;
+    margin-top: -2rem;
+  }
+  .page-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.5rem;
+    letter-spacing: 0.1em;
+    line-height: 1;
+  }
+  .page-sub { color: var(--muted); font-size: 0.85rem; margin-top: 0.3rem; }
+
+  /* BUTTONS */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.55rem 1.1rem;
+    border-radius: 5px;
+    font-family: 'Barlow', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    border: none;
+    transition: all 0.15s;
+  }
+  .btn-primary { background: var(--accent); color: #0a0b0d; }
+  .btn-primary:hover { background: #f0d45a; }
+  .btn-danger { background: var(--danger); color: #fff; }
+  .btn-danger:hover { background: #f05a5a; }
+  .btn-ghost { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-sm { padding: 0.35rem 0.75rem; font-size: 0.78rem; }
+  .btn-green { background: var(--accent2); color: #0a0b0d; }
+  .btn-green:hover { background: #5af0b0; }
+
+  /* STATS ROW */
+  .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.2rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+  .stat-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); font-weight: 600; }
+  .stat-value { font-family: 'Bebas Neue', sans-serif; font-size: 2.2rem; letter-spacing: 0.05em; line-height: 1; }
+  .stat-value.accent { color: var(--accent); }
+  .stat-value.danger { color: var(--danger); }
+  .stat-value.warning { color: var(--warning); }
+  .stat-value.green { color: var(--accent2); }
+
+  /* CARDS / TABLE */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .card-header {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    font-weight: 600;
+  }
+  table { width: 100%; border-collapse: collapse; }
+  th {
+    background: var(--surface2);
+    padding: 0.75rem 1.2rem;
+    text-align: left;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    font-weight: 600;
+    border-bottom: 1px solid var(--border);
+  }
+  td {
+    padding: 0.85rem 1.2rem;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.88rem;
+    vertical-align: middle;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+  .mono { font-family: 'DM Mono', monospace; font-size: 0.82rem; color: var(--muted); }
+
+  /* BADGES */
+  .badge {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 3px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .badge-green { background: rgba(74,232,160,0.12); color: var(--accent2); border: 1px solid rgba(74,232,160,0.25); }
+  .badge-yellow { background: rgba(232,200,74,0.12); color: var(--accent); border: 1px solid rgba(232,200,74,0.25); }
+  .badge-red { background: rgba(232,74,74,0.12); color: var(--danger); border: 1px solid rgba(232,74,74,0.25); }
+  .badge-orange { background: rgba(232,149,74,0.12); color: var(--warning); border: 1px solid rgba(232,149,74,0.25); }
+  .badge-muted { background: rgba(107,114,128,0.12); color: var(--muted); border: 1px solid rgba(107,114,128,0.25); }
+
+  /* STRIKES */
+  .strikes { display: flex; gap: 4px; align-items: center; }
+  .strike-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--border);
+  }
+  .strike-dot.filled { background: var(--danger); }
+  .strike-dot.warn { background: var(--warning); }
+
+  /* HOURS BAR */
+  .hours-bar-wrap { display: flex; align-items: center; gap: 0.6rem; }
+  .hours-bar-bg {
+    flex: 1;
+    height: 6px;
+    background: var(--border);
+    border-radius: 99px;
+    overflow: hidden;
+    min-width: 60px;
+  }
+  .hours-bar-fill {
+    height: 100%;
+    border-radius: 99px;
+    background: var(--accent2);
+    transition: width 0.3s;
+  }
+  .hours-bar-fill.warn { background: var(--warning); }
+  .hours-bar-fill.danger { background: var(--danger); }
+  .hours-num { font-family: 'DM Mono', monospace; font-size: 0.8rem; min-width: 45px; }
+
+  /* MODAL */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(4px);
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+  }
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    width: 100%;
+    max-width: 520px;
+    max-height: 90vh;
+    overflow-y: auto;
+    transform: translateY(16px);
+    transition: transform 0.2s;
+    padding: 2rem;
+  }
+  .modal-overlay.open .modal { transform: translateY(0); }
+  .modal-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.6rem;
+    letter-spacing: 0.08em;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .modal-actions { display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+
+  /* FORM */
+  .form-group { margin-bottom: 1.1rem; }
+  label { display: block; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 0.4rem; }
+  input, select, textarea {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    color: var(--text);
+    font-family: 'Barlow', sans-serif;
+    font-size: 0.9rem;
+    padding: 0.6rem 0.85rem;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--accent); }
+  select option { background: var(--surface2); }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .form-hint { font-size: 0.73rem; color: var(--muted); margin-top: 0.3rem; }
+  .error-msg { font-size: 0.78rem; color: var(--danger); margin-top: 0.3rem; display: none; }
+  .error-msg.show { display: block; }
+
+  /* SEARCH / FILTER */
+  .toolbar { display: flex; gap: 0.75rem; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; }
+  .search-wrap { position: relative; flex: 1; min-width: 200px; }
+  .search-wrap input { padding-left: 2.2rem; }
+  .search-icon { position: absolute; left: 0.7rem; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 0.9rem; pointer-events: none; }
+
+  /* WEEK RESET */
+  .week-bar {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .week-info { display: flex; flex-direction: column; gap: 0.2rem; }
+  .week-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); font-weight: 600; }
+  .week-val { font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; color: var(--accent); }
+
+  /* GANG TAG */
+  .gang-tag {
+    display: inline-block;
+    padding: 0.18rem 0.55rem;
+    border-radius: 3px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    background: rgba(107,114,128,0.15);
+    color: var(--muted);
+  }
+
+  /* EMPTY STATE */
+  .empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--muted);
+  }
+  .empty-state .empty-icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
+  .empty-state p { font-size: 0.9rem; }
+
+  /* CONFIRM */
+  .confirm-text { color: var(--muted); font-size: 0.9rem; line-height: 1.6; margin-bottom: 0.5rem; }
+  .confirm-name { color: var(--text); font-weight: 700; }
+
+  /* TABS */
+  .tabs { display: flex; gap: 0.25rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border); padding-bottom: 0; }
+  .tab-btn {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-family: 'Barlow', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 0.6rem 1.2rem;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: all 0.15s;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .tab-btn:hover:not(.active) { color: var(--text); }
+  .tab-pane { display: none; }
+  .tab-pane.active { display: block; }
+
+  /* REPOSSESSION ALERT */
+  .repo-alert {
+    background: rgba(232,74,74,0.08);
+    border: 1px solid rgba(232,74,74,0.3);
+    border-radius: 8px;
+    padding: 1rem 1.5rem;
+    margin-bottom: 1.5rem;
+    display: none;
+  }
+  .repo-alert.show { display: block; }
+  .repo-alert-title { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--danger); margin-bottom: 0.5rem; }
+  .repo-alert-list { list-style: none; display: flex; flex-direction: column; gap: 0.3rem; }
+  .repo-alert-list li { font-size: 0.85rem; color: var(--text); }
+  .repo-alert-list li span { color: var(--muted); }
+
+  /* INLINE HOUR INPUT */
+  .hour-input { width: 70px; text-align: center; font-family: 'DM Mono', monospace; }
+  .save-hours-btn { font-size: 0.75rem; padding: 0.25rem 0.6rem; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Circuit RP <span>(Public) Business Registry</span></div>
+  <nav>
+    <button class="nav-btn active" onclick="showPage('dashboard')">Dashboard</button>
+    <button class="nav-btn" onclick="showPage('businesses')">Businesses</button>
+    <button class="nav-btn" onclick="showPage('gangs')">Gangs</button>
+  </nav>
+</header>
+
+<main>
+
+  <!-- DASHBOARD -->
+  <div class="page active" id="page-dashboard">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Dashboard</div>
+        <div class="page-sub">Weekly overview — reset clears hours and applies strikes</div>
+      </div>
+      <div style="display:flex;gap:.75rem;">
+        <label class="btn btn-ghost" style="cursor:pointer;">↑ Import<input type="file" accept=".json" style="display:none;" onchange="importData(event)"/></label>
+        <button class="btn btn-ghost" onclick="exportData()">↓ Export</button>
+      </div>
+    </div>
+
+    <div class="week-bar">
+      <div class="week-info">
+        <span class="week-label">Current Week</span>
+        <span class="week-val" id="current-week-label">Week 1</span>
+      </div>
+      <div style="display:flex;gap:.75rem;align-items:center;">
+        <span style="font-size:.82rem;color:var(--muted)">Required hours: <strong style="color:var(--text)">20 hrs</strong></span>
+        <button class="btn btn-primary" onclick="openResetModal()">⟳ &nbsp;Reset Week</button>
+      </div>
+    </div>
+
+    <div id="repo-alert" class="repo-alert">
+      <div class="repo-alert-title">⚠ Repossession Required</div>
+      <ul id="repo-list" class="repo-alert-list"></ul>
+    </div>
+
+    <div class="stats-row" id="dash-stats"></div>
+
+    <div class="card">
+      <div class="card-header">
+        All Businesses — This Week
+        <span id="dash-week-num" style="font-family:'DM Mono',monospace;color:var(--accent)"></span>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Business</th>
+            <th>Type</th>
+            <th>Owner</th>
+            <th>Gang</th>
+            <th>Hours</th>
+            <th>Status</th>
+            <th>Strikes</th>
+          </tr>
+        </thead>
+        <tbody id="dash-table-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- BUSINESSES -->
+  <div class="page" id="page-businesses">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Businesses</div>
+        <div class="page-sub">Manage business registrations, owners, and weekly hours</div>
+      </div>
+      <button class="btn btn-primary" onclick="openBusinessModal()">+ Add Business</button>
+    </div>
+
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchBizTab('all')">All</button>
+      <button class="tab-btn" onclick="switchBizTab('restaurant')">Restaurants</button>
+      <button class="tab-btn" onclick="switchBizTab('mechanic')">Mechanic Shops</button>
+      <button class="tab-btn" onclick="switchBizTab('other')">Shops</button>
+    </div>
+
+    <div class="toolbar">
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" placeholder="Search business or owner..." id="biz-search" oninput="renderBusinessTable()"/>
+      </div>
+    </div>
+
+    <div class="card">
+      <table>
+        <thead>
+          <tr>
+            <th>Business Name</th>
+            <th>Type</th>
+            <th>Owner Name</th>
+            <th>Account ID</th>
+            <th>State ID</th>
+            <th>Gang</th>
+            <th>Hours (This Week)</th>
+            <th>Strikes</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="biz-table-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- GANGS -->
+  <div class="page" id="page-gangs">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Gang Registry</div>
+        <div class="page-sub">Members, affiliations, and business ownership enforcement</div>
+      </div>
+      <div style="display:flex;gap:.75rem;">
+        <button class="btn btn-ghost" onclick="openGangModal()">+ Add Gang</button>
+        <button class="btn btn-primary" onclick="openMemberModal()">+ Add Member</button>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" placeholder="Search member, state ID, account ID..." id="gang-search" oninput="renderGangTable()"/>
+      </div>
+      <select id="gang-filter" onchange="renderGangTable()" style="max-width:200px;">
+        <option value="">All Gangs</option>
+      </select>
+    </div>
+
+    <div class="card" style="margin-bottom:1.5rem;">
+      <div class="card-header">Gang Overview</div>
+      <table>
+        <thead>
+          <tr><th>Gang</th><th>Members</th><th>Businesses Owned</th><th>Business Types</th><th>Ranks</th><th>Actions</th></tr>
+        </thead>
+        <tbody id="gang-overview-body"></tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="card-header">All Members</div>
+      <table>
+        <thead>
+          <tr>
+            <th>Character Name</th>
+            <th>Gang</th>
+            <th>Rank</th>
+            <th>Account ID</th>
+            <th>State ID</th>
+            <th>Business</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="gang-table-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+</main>
+
+<!-- MODALS -->
+
+<!-- Add/Edit Business Modal -->
+<div class="modal-overlay" id="modal-business">
+  <div class="modal">
+    <div class="modal-title" id="biz-modal-title">Add Business</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Business Name</label>
+        <input type="text" id="biz-name" placeholder="e.g. Burger Shot"/>
+      </div>
+      <div class="form-group">
+        <label>Business Type</label>
+        <select id="biz-type">
+          <option value="restaurant">Restaurant / Food</option>
+          <option value="mechanic">Mechanic Shop</option>
+          <option value="other">Shops</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group" id="biz-custom-wrap" style="display:none;">
+      <label>Custom Shop Name</label>
+      <input type="text" id="biz-custom-type" placeholder="e.g. Clothing Store"/>
+    </div>
+    <hr style="border:none;border-top:1px solid var(--border);margin:0.5rem 0 1rem"/>
+    <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:.75rem;font-weight:600;">Owner Info</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Owner Name</label>
+        <input type="text" id="biz-owner" placeholder="Character name"/>
+      </div>
+      <div class="form-group">
+        <label>Gang</label>
+        <select id="biz-gang"><option value="">— None —</option></select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Account ID</label>
+        <input type="text" id="biz-account-id" placeholder="e.g. ACC-10042" class="mono" style="font-family:'DM Mono',monospace"/>
+        <div class="form-hint">Rockstar / server account</div>
+      </div>
+      <div class="form-group">
+        <label>State ID</label>
+        <input type="text" id="biz-state-id" placeholder="e.g. 4821" class="mono" style="font-family:'DM Mono',monospace"/>
+        <div class="form-hint">In-game character ID</div>
+      </div>
+    </div>
+    <div id="gang-type-error" class="error-msg">⚠ This gang already owns a business of this type.</div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-business')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveBusiness()">Save Business</button>
+    </div>
+  </div>
+</div>
+
+<!-- Log Hours Modal -->
+<div class="modal-overlay" id="modal-hours">
+  <div class="modal">
+    <div class="modal-title">Log Hours</div>
+    <div id="hours-biz-name" style="color:var(--muted);font-size:.9rem;margin-bottom:1.25rem;"></div>
+    <div class="form-group">
+      <label>Hours Worked This Week</label>
+      <input type="number" id="hours-input" min="0" max="168" placeholder="0" style="font-size:1.5rem;text-align:center;font-family:'Bebas Neue',sans-serif;letter-spacing:.05em;"/>
+      <div class="form-hint">Required minimum: 20 hours</div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-hours')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveHours()">Save Hours</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Gang Modal -->
+<div class="modal-overlay" id="modal-gang">
+  <div class="modal">
+    <div class="modal-title">Add Gang</div>
+    <div class="form-group">
+      <label>Gang Name</label>
+      <input type="text" id="gang-name-input" placeholder="e.g. Ballas"/>
+    </div>
+    <div class="form-group">
+      <label>Tag / Color (optional)</label>
+      <input type="text" id="gang-tag-input" placeholder="e.g. BALLA"/>
+      <div class="form-hint">Short identifier shown on badges</div>
+    </div>
+    <div class="form-group">
+      <label>Ranks (one per line)</label>
+      <textarea id="gang-ranks-input" placeholder="e.g.&#10;Boss&#10;Underboss&#10;Captain&#10;Soldier&#10;Associate" rows="5" style="resize:vertical;"></textarea>
+      <div class="form-hint">These will appear as options when adding members. You can edit ranks later from the gang overview.</div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-gang')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveGang()">Add Gang</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Member Modal -->
+<div class="modal-overlay" id="modal-member">
+  <div class="modal">
+    <div class="modal-title" id="member-modal-title">Add Gang Member</div>
+    <div class="form-group">
+      <label>Character Name</label>
+      <input type="text" id="member-name" placeholder="In-game character name"/>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Account ID</label>
+        <input type="text" id="member-account-id" placeholder="ACC-10042" style="font-family:'DM Mono',monospace"/>
+      </div>
+      <div class="form-group">
+        <label>State ID</label>
+        <input type="text" id="member-state-id" placeholder="4821" style="font-family:'DM Mono',monospace"/>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Gang</label>
+        <select id="member-gang" onchange="onMemberGangChange()"><option value="">— Select Gang —</option></select>
+      </div>
+      <div class="form-group">
+        <label>Rank</label>
+        <div style="display:flex;gap:.5rem;">
+          <select id="member-rank-select" onchange="onRankSelectChange()" style="flex:1;">
+            <option value="">— Select Rank —</option>
+          </select>
+          <input type="text" id="member-rank-custom" placeholder="or type rank..." style="flex:1;display:none;"/>
+        </div>
+        <div class="form-hint" id="member-rank-hint">Select a gang first to see its ranks</div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-member')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveMember()">Save Member</button>
+    </div>
+  </div>
+</div>
+
+<!-- Reset Week Modal -->
+<div class="modal-overlay" id="modal-reset">
+  <div class="modal">
+    <div class="modal-title">Reset Week</div>
+    <p class="confirm-text">This will finalize the current week. Businesses under <strong style="color:var(--text)">20 hours</strong> will receive a strike. Businesses with <strong style="color:var(--danger)">2 strikes</strong> will be flagged for repossession.</p>
+    <p class="confirm-text" style="margin-top:.75rem;">After reset, all hours return to <strong style="color:var(--text)">0</strong> for the new week.</p>
+    <div id="reset-preview" style="margin-top:1rem;"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-reset')">Cancel</button>
+      <button class="btn btn-danger" onclick="confirmReset()">Confirm Reset</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Ranks Modal -->
+<div class="modal-overlay" id="modal-edit-ranks">
+  <div class="modal">
+    <div class="modal-title">Edit Ranks — <span id="edit-ranks-gang-name" style="color:var(--accent)"></span></div>
+    <div class="form-group">
+      <label>Ranks (one per line)</label>
+      <textarea id="edit-ranks-input" rows="7" placeholder="e.g.&#10;Boss&#10;Underboss&#10;Captain&#10;Soldier&#10;Associate" style="resize:vertical;"></textarea>
+      <div class="form-hint">Members with existing ranks not in this list will keep their rank but it won't appear in the dropdown.</div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-edit-ranks')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveRanks()">Save Ranks</button>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm Delete Modal -->
+<div class="modal-overlay" id="modal-confirm-delete">
+  <div class="modal">
+    <div class="modal-title">Confirm Delete</div>
+    <p class="confirm-text">Are you sure you want to remove <span class="confirm-name" id="delete-target-name"></span>? This cannot be undone.</p>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-confirm-delete')">Cancel</button>
+      <button class="btn btn-danger" onclick="confirmDelete()">Delete</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+
+// ─── FIREBASE CONFIG ──────────────────────────────────────────────────────────
+const firebaseConfig = {
+  apiKey: "AIzaSyBI67TAS71aRDVIJPsX93FcfG6Btr23XAE",
+  authDomain: "circuit-rp-public-staff-db.firebaseapp.com",
+  projectId: "circuit-rp-public-staff-db",
+  storageBucket: "circuit-rp-public-staff-db.firebasestorage.app",
+  messagingSenderId: "773610748016",
+  appId: "1:773610748016:web:495bd318886407e3a35cb5"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const STATE_DOC = doc(db, 'registry', 'main');
+
+// ─── STATE ────────────────────────────────────────────────────────────────────
+let state = {
+  weekNum: 1,
+  businesses: [],
+  gangs: [],
+  members: [],
+};
+let editingBizId = null;
+let editingMemberId = null;
+let hoursTargetId = null;
+let deleteTargetType = null;
+let deleteTargetId = null;
+let bizTab = 'all';
+
+function saveState() {
+  setDoc(STATE_DOC, state).catch(err => console.error('Save failed:', err));
+}
+function genId() { return '_' + Math.random().toString(36).substring(2, 11); }
+function esc(s) {
+  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ─── NAVIGATION ───────────────────────────────────────────────────────────────
+function showPage(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  const btns = document.querySelectorAll('.nav-btn');
+  const pages = ['dashboard','businesses','gangs'];
+  btns[pages.indexOf(page)].classList.add('active');
+  renderAll();
+}
+
+// ─── RENDER ───────────────────────────────────────────────────────────────────
+function renderAll() {
+  renderDashboard();
+  renderBusinessTable();
+  renderGangPage();
+}
+
+function typeLabel(t, customType) {
+  if (t === 'restaurant') return 'Restaurant';
+  if (t === 'mechanic') return 'Mechanic Shop';
+  if (t === 'other') return esc(customType) || 'Shop';
+  return 'Shop';
+}
+
+function strikeBadge(strikes) {
+  if (strikes === 0) return `<span class="badge badge-green">Clean</span>`;
+  if (strikes === 1) return `<span class="badge badge-orange">1 Strike</span>`;
+  return `<span class="badge badge-red">REPO</span>`;
+}
+
+function hoursBar(hours) {
+  const pct = Math.min((hours / 20) * 100, 100);
+  const cls = hours >= 20 ? '' : hours >= 10 ? 'warn' : 'danger';
+  const color = hours >= 20 ? 'var(--accent2)' : hours >= 10 ? 'var(--warning)' : 'var(--danger)';
+  return `<div class="hours-bar-wrap">
+    <div class="hours-bar-bg"><div class="hours-bar-fill ${cls}" style="width:${pct}%"></div></div>
+    <span class="hours-num" style="color:${color}">${hours}h</span>
+  </div>`;
+}
+
+function gangBadge(gangId) {
+  if (!gangId) return `<span style="color:var(--muted);font-size:.8rem;">—</span>`;
+  const g = state.gangs.find(g => g.id === gangId);
+  if (!g) return `<span style="color:var(--muted);font-size:.8rem;">—</span>`;
+  return `<span class="gang-tag">${esc(g.tag || g.name)}</span>`;
+}
+
+// DASHBOARD
+function renderDashboard() {
+  const total = state.businesses.length;
+  const passing = state.businesses.filter(b => b.hours >= 20).length;
+  const strikes = state.businesses.filter(b => b.strikes > 0).length;
+  const repos = state.businesses.filter(b => b.strikes >= 2).length;
+
+  document.getElementById('dash-stats').innerHTML = `
+    <div class="stat-card"><div class="stat-label">Total Businesses</div><div class="stat-value accent">${total}</div></div>
+    <div class="stat-card"><div class="stat-label">Meeting Hours</div><div class="stat-value green">${passing}</div></div>
+    <div class="stat-card"><div class="stat-label">With Strikes</div><div class="stat-value warning">${strikes}</div></div>
+    <div class="stat-card"><div class="stat-label">Flagged for Repo</div><div class="stat-value danger">${repos}</div></div>
+  `;
+
+  document.getElementById('current-week-label').textContent = `Week ${state.weekNum}`;
+  document.getElementById('dash-week-num').textContent = `Week ${state.weekNum}`;
+
+  // Repo alert
+  const repoList = state.businesses.filter(b => b.strikes >= 2);
+  const alertEl = document.getElementById('repo-alert');
+  const listEl = document.getElementById('repo-list');
+  if (repoList.length > 0) {
+    alertEl.classList.add('show');
+    listEl.innerHTML = repoList.map(b => `<li><strong>${esc(b.name)}</strong> <span>— ${esc(b.ownerName)} (State ID: ${esc(b.stateId) || '—'})</span></li>`).join('');
+  } else {
+    alertEl.classList.remove('show');
+  }
+
+  const tbody = document.getElementById('dash-table-body');
+  if (!state.businesses.length) {
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">🏢</div><p>No businesses registered yet.</p></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = state.businesses.map(b => `
+    <tr>
+      <td><strong>${esc(b.name)}</strong></td>
+      <td><span class="badge badge-muted">${typeLabel(b.type, b.customType)}</span></td>
+      <td>${esc(b.ownerName) || '—'}</td>
+      <td>${gangBadge(b.gangId)}</td>
+      <td>${hoursBar(b.hours)}</td>
+      <td>${b.hours >= 20 ? `<span class="badge badge-green">Active</span>` : `<span class="badge badge-orange">Below Req.</span>`}</td>
+      <td>${strikeBadge(b.strikes)}</td>
+    </tr>
+  `).join('');
+}
+
+// BUSINESSES
+function switchBizTab(tab) {
+  bizTab = tab;
+  document.querySelectorAll('.tab-btn').forEach((b,i) => {
+    b.classList.toggle('active', ['all','restaurant','mechanic','other'][i] === tab);
+  });
+  renderBusinessTable();
+}
+
+function renderBusinessTable() {
+  const search = (document.getElementById('biz-search')?.value || '').toLowerCase();
+  let list = state.businesses.filter(b => {
+    if (bizTab !== 'all' && b.type !== bizTab) return false;
+    if (search) {
+      return b.name.toLowerCase().includes(search) ||
+        (b.ownerName || '').toLowerCase().includes(search) ||
+        (b.accountId || '').toLowerCase().includes(search) ||
+        (b.stateId || '').toLowerCase().includes(search);
+    }
+    return true;
+  });
+
+  const tbody = document.getElementById('biz-table-body');
+  if (!tbody) return;
+  if (!list.length) {
+    tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state"><div class="empty-icon">🏢</div><p>No businesses found.</p></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = list.map(b => `
+    <tr>
+      <td><strong>${esc(b.name)}</strong></td>
+      <td><span class="badge badge-muted">${typeLabel(b.type, b.customType)}</span></td>
+      <td>${esc(b.ownerName) || '—'}</td>
+      <td><span class="mono">${esc(b.accountId) || '—'}</span></td>
+      <td><span class="mono">${esc(b.stateId) || '—'}</span></td>
+      <td>${gangBadge(b.gangId)}</td>
+      <td>${hoursBar(b.hours)}</td>
+      <td>
+        <div class="strikes">
+          <div class="strike-dot ${b.strikes >= 1 ? 'filled' : ''}"></div>
+          <div class="strike-dot ${b.strikes >= 2 ? 'filled' : ''}"></div>
+          ${strikeBadge(b.strikes)}
+        </div>
+      </td>
+      <td>
+        <div style="display:flex;gap:.4rem;">
+          <button class="btn btn-ghost btn-sm" onclick="openHoursModal('${b.id}')">Log Hours</button>
+          <button class="btn btn-ghost btn-sm" onclick="openBusinessModal('${b.id}')">Edit</button>
+          ${b.strikes > 0 ? `<button class="btn btn-ghost btn-sm" onclick="clearStrike('${b.id}')" title="Remove one strike">−Strike</button>` : ''}
+          <button class="btn btn-danger btn-sm" onclick="openDeleteModal('business','${b.id}')">✕</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+// GANGS
+function renderGangPage() {
+  // populate filter selects
+  const filterSel = document.getElementById('gang-filter');
+  const memberSel = document.getElementById('member-gang');
+  const bizGangSel = document.getElementById('biz-gang');
+
+  if (filterSel) {
+    const cur = filterSel.value;
+    filterSel.innerHTML = `<option value="">All Gangs</option>` + state.gangs.map(g => `<option value="${g.id}" ${g.id===cur?'selected':''}>${g.name}</option>`).join('');
+  }
+  if (memberSel) memberSel.innerHTML = `<option value="">— Select Gang —</option>` + state.gangs.map(g => `<option value="${g.id}">${g.name}</option>`).join('');
+  if (bizGangSel) bizGangSel.innerHTML = `<option value="">— None —</option>` + state.gangs.map(g => `<option value="${g.id}">${g.name}</option>`).join('');
+
+  // Gang overview
+  const overviewTbody = document.getElementById('gang-overview-body');
+  if (overviewTbody) {
+    if (!state.gangs.length) {
+      overviewTbody.innerHTML = `<tr><td colspan="5"><div class="empty-state"><div class="empty-icon">🤝</div><p>No gangs yet.</p></div></td></tr>`;
+    } else {
+      overviewTbody.innerHTML = state.gangs.map(g => {
+        const memberCount = state.members.filter(m => m.gangId === g.id).length;
+        const ownedBiz = state.businesses.filter(b => b.gangId === g.id);
+        const types = [...new Set(ownedBiz.map(b => typeLabel(b.type, b.customType)))].join(', ') || '—';
+        const rankCount = (g.ranks||[]).length;
+        const rankStr = rankCount ? (g.ranks||[]).map(esc).join(', ') : '—';
+        return `<tr>
+          <td><strong>${esc(g.name)}</strong> ${g.tag ? `<span class="gang-tag">${esc(g.tag)}</span>` : ''}</td>
+          <td>${memberCount}</td>
+          <td>${ownedBiz.length}</td>
+          <td><span style="color:var(--muted);font-size:.85rem;">${types}</span></td>
+          <td><span style="color:var(--muted);font-size:.82rem;">${rankStr}</span></td>
+          <td>
+            <div style="display:flex;gap:.4rem;">
+              <button class="btn btn-ghost btn-sm" onclick="openEditRanksModal('${g.id}')">Edit Ranks</button>
+              <button class="btn btn-danger btn-sm" onclick="openDeleteModal('gang','${g.id}')">Remove</button>
+            </div>
+          </td>
+        </tr>`;
+      }).join('');
+    }
+  }
+
+  renderGangTable();
+}
+
+function renderGangTable() {
+  const search = (document.getElementById('gang-search')?.value || '').toLowerCase();
+  const gangFilter = document.getElementById('gang-filter')?.value || '';
+  let list = state.members.filter(m => {
+    if (gangFilter && m.gangId !== gangFilter) return false;
+    if (search) {
+      return (m.name || '').toLowerCase().includes(search) ||
+        (m.accountId || '').toLowerCase().includes(search) ||
+        (m.stateId || '').toLowerCase().includes(search);
+    }
+    return true;
+  });
+
+  const tbody = document.getElementById('gang-table-body');
+  if (!tbody) return;
+  if (!list.length) {
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">👤</div><p>No members found.</p></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = list.map(m => {
+    const biz = state.businesses.find(b =>
+      (m.accountId && b.accountId === m.accountId) ||
+      (m.stateId && b.stateId === m.stateId)
+    );
+    return `<tr>
+      <td><strong>${esc(m.name)}</strong></td>
+      <td>${gangBadge(m.gangId)}</td>
+      <td>${m.rank ? `<span style="font-size:.8rem;color:var(--accent);">${esc(m.rank)}</span>` : `<span style="color:var(--muted);font-size:.8rem;">—</span>`}</td>
+      <td><span class="mono">${esc(m.accountId) || '—'}</span></td>
+      <td><span class="mono">${esc(m.stateId) || '—'}</span></td>
+      <td>${biz ? `<span style="font-size:.85rem;">${esc(biz.name)}</span>` : `<span style="color:var(--muted);font-size:.82rem;">—</span>`}</td>
+      <td>
+        <div style="display:flex;gap:.4rem;">
+          <button class="btn btn-ghost btn-sm" onclick="openMemberModal('${m.id}')">Edit</button>
+          <button class="btn btn-danger btn-sm" onclick="openDeleteModal('member','${m.id}')">✕</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+// ─── MODALS ───────────────────────────────────────────────────────────────────
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+document.querySelectorAll('.modal-overlay').forEach(el => {
+  el.addEventListener('click', e => { if (e.target === el) el.classList.remove('open'); });
+});
+
+// Business Modal
+function openBusinessModal(id = null) {
+  editingBizId = id;
+  renderGangPage(); // refresh selects
+  document.getElementById('biz-modal-title').textContent = id ? 'Edit Business' : 'Add Business';
+  document.getElementById('gang-type-error').classList.remove('show');
+  if (id) {
+    const b = state.businesses.find(b => b.id === id);
+    document.getElementById('biz-name').value = b.name;
+    document.getElementById('biz-type').value = b.type;
+    document.getElementById('biz-custom-type').value = b.customType || '';
+    document.getElementById('biz-owner').value = b.ownerName;
+    document.getElementById('biz-gang').value = b.gangId || '';
+    document.getElementById('biz-account-id').value = b.accountId || '';
+    document.getElementById('biz-state-id').value = b.stateId || '';
+    document.getElementById('biz-custom-wrap').style.display = b.type === 'other' ? 'block' : 'none';
+  } else {
+    document.getElementById('biz-name').value = '';
+    document.getElementById('biz-type').value = 'restaurant';
+    document.getElementById('biz-custom-type').value = '';
+    document.getElementById('biz-owner').value = '';
+    document.getElementById('biz-gang').value = '';
+    document.getElementById('biz-account-id').value = '';
+    document.getElementById('biz-state-id').value = '';
+    document.getElementById('biz-custom-wrap').style.display = 'none';
+  }
+  openModal('modal-business');
+}
+
+document.getElementById('biz-type').addEventListener('change', function() {
+  document.getElementById('biz-custom-wrap').style.display = this.value === 'other' ? 'block' : 'none';
+});
+
+function saveBusiness() {
+  const name = document.getElementById('biz-name').value.trim();
+  const type = document.getElementById('biz-type').value;
+  const customType = document.getElementById('biz-custom-type').value.trim();
+  const ownerName = document.getElementById('biz-owner').value.trim();
+  const gangId = document.getElementById('biz-gang').value;
+  const accountId = document.getElementById('biz-account-id').value.trim();
+  const stateId = document.getElementById('biz-state-id').value.trim();
+
+  if (!name) { alert('Business name is required.'); return; }
+
+  // Gang-type uniqueness check
+  const errEl = document.getElementById('gang-type-error');
+  if (gangId) {
+    const conflict = state.businesses.find(b =>
+      b.gangId === gangId && b.type === type &&
+      b.id !== editingBizId
+    );
+    if (conflict) { errEl.classList.add('show'); return; }
+  }
+  errEl.classList.remove('show');
+
+  if (editingBizId) {
+    const idx = state.businesses.findIndex(b => b.id === editingBizId);
+    state.businesses[idx] = { ...state.businesses[idx], name, type, customType, ownerName, gangId, accountId, stateId };
+  } else {
+    state.businesses.push({ id: genId(), name, type, customType, ownerName, gangId, accountId, stateId, hours: 0, strikes: 0 });
+  }
+  saveState();
+  closeModal('modal-business');
+  renderAll();
+}
+
+// Hours Modal
+function openHoursModal(bizId) {
+  hoursTargetId = bizId;
+  const b = state.businesses.find(b => b.id === bizId);
+  document.getElementById('hours-biz-name').textContent = `${b.name} — ${b.ownerName || 'No owner'}`;
+  document.getElementById('hours-input').value = b.hours;
+  openModal('modal-hours');
+}
+
+function saveHours() {
+  const val = parseInt(document.getElementById('hours-input').value) || 0;
+  const idx = state.businesses.findIndex(b => b.id === hoursTargetId);
+  state.businesses[idx].hours = Math.max(0, val);
+  saveState();
+  closeModal('modal-hours');
+  renderAll();
+}
+
+// Gang Modal
+function openGangModal() {
+  document.getElementById('gang-name-input').value = '';
+  document.getElementById('gang-tag-input').value = '';
+  document.getElementById('gang-ranks-input').value = '';
+  openModal('modal-gang');
+}
+
+function saveGang() {
+  const name = document.getElementById('gang-name-input').value.trim();
+  if (!name) { alert('Gang name is required.'); return; }
+  const tag = document.getElementById('gang-tag-input').value.trim().toUpperCase();
+  const ranksRaw = document.getElementById('gang-ranks-input').value.trim();
+  const ranks = ranksRaw ? ranksRaw.split('\n').map(r=>r.trim()).filter(Boolean) : [];
+  state.gangs.push({ id: genId(), name, tag, ranks });
+  saveState();
+  closeModal('modal-gang');
+  renderAll();
+}
+
+// Member Modal
+function onMemberGangChange() {
+  const gangId = document.getElementById('member-gang').value;
+  populateRankDropdown(gangId, '');
+}
+
+function populateRankDropdown(gangId, currentRank) {
+  const sel = document.getElementById('member-rank-select');
+  const custom = document.getElementById('member-rank-custom');
+  const hint = document.getElementById('member-rank-hint');
+  const g = state.gangs.find(g => g.id === gangId);
+  const ranks = g?.ranks || [];
+
+  if (!gangId) {
+    sel.innerHTML = `<option value="">— Select Rank —</option>`;
+    sel.style.display = '';
+    custom.style.display = 'none';
+    hint.textContent = 'Select a gang first to see its ranks';
+    return;
+  }
+
+  if (ranks.length === 0) {
+    sel.innerHTML = `<option value="">— No ranks defined —</option>`;
+    sel.style.display = 'none';
+    custom.style.display = '';
+    custom.value = currentRank || '';
+    hint.textContent = 'No ranks set for this gang — type one freely, or add ranks via Edit Ranks';
+    return;
+  }
+
+  // Build dropdown with existing ranks + custom option
+  const isCustom = currentRank && !ranks.includes(currentRank);
+  sel.innerHTML = `<option value="">— Select Rank —</option>`
+    + ranks.map(r => `<option value="${r}" ${r===currentRank?'selected':''}>${r}</option>`).join('')
+    + `<option value="__custom__" ${isCustom?'selected':''}>Other (type custom)...</option>`;
+  sel.style.display = '';
+
+  if (isCustom) {
+    custom.style.display = '';
+    custom.value = currentRank;
+  } else {
+    custom.style.display = sel.value === '__custom__' ? '' : 'none';
+    custom.value = '';
+  }
+  hint.textContent = '';
+}
+
+function onRankSelectChange() {
+  const sel = document.getElementById('member-rank-select');
+  const custom = document.getElementById('member-rank-custom');
+  if (sel.value === '__custom__') {
+    custom.style.display = '';
+    custom.focus();
+  } else {
+    custom.style.display = 'none';
+    custom.value = '';
+  }
+}
+
+function openMemberModal(id = null) {
+  editingMemberId = id;
+  renderGangPage();
+  document.getElementById('member-modal-title').textContent = id ? 'Edit Member' : 'Add Gang Member';
+  if (id) {
+    const m = state.members.find(m => m.id === id);
+    document.getElementById('member-name').value = m.name;
+    document.getElementById('member-account-id').value = m.accountId || '';
+    document.getElementById('member-state-id').value = m.stateId || '';
+    document.getElementById('member-gang').value = m.gangId || '';
+    populateRankDropdown(m.gangId || '', m.rank || '');
+  } else {
+    document.getElementById('member-name').value = '';
+    document.getElementById('member-account-id').value = '';
+    document.getElementById('member-state-id').value = '';
+    document.getElementById('member-gang').value = '';
+    populateRankDropdown('', '');
+  }
+  openModal('modal-member');
+}
+
+function saveMember() {
+  const name = document.getElementById('member-name').value.trim();
+  const accountId = document.getElementById('member-account-id').value.trim();
+  const stateId = document.getElementById('member-state-id').value.trim();
+  const gangId = document.getElementById('member-gang').value;
+  const rankSel = document.getElementById('member-rank-select').value;
+  const rankCustom = document.getElementById('member-rank-custom').value.trim();
+  const rank = rankSel === '__custom__' ? rankCustom : (rankSel || rankCustom);
+  if (!name) { alert('Character name is required.'); return; }
+  if (!gangId) { alert('Please select a gang.'); return; }
+  if (editingMemberId) {
+    const idx = state.members.findIndex(m => m.id === editingMemberId);
+    state.members[idx] = { ...state.members[idx], name, accountId, stateId, gangId, rank };
+  } else {
+    state.members.push({ id: genId(), name, accountId, stateId, gangId, rank });
+  }
+  saveState();
+  closeModal('modal-member');
+  renderAll();
+}
+
+// Edit Ranks Modal
+let editingRanksGangId = null;
+function openEditRanksModal(gangId) {
+  editingRanksGangId = gangId;
+  const g = state.gangs.find(g => g.id === gangId);
+  document.getElementById('edit-ranks-gang-name').textContent = g.name;
+  document.getElementById('edit-ranks-input').value = (g.ranks||[]).join('\n');
+  openModal('modal-edit-ranks');
+}
+
+function saveRanks() {
+  const raw = document.getElementById('edit-ranks-input').value.trim();
+  const ranks = raw ? raw.split('\n').map(r=>r.trim()).filter(Boolean) : [];
+  const idx = state.gangs.findIndex(g => g.id === editingRanksGangId);
+  if (idx >= 0) state.gangs[idx].ranks = ranks;
+  saveState();
+  closeModal('modal-edit-ranks');
+  renderAll();
+}
+
+// Reset Week Modal
+function openResetModal() {
+  const failing = state.businesses.filter(b => b.hours < 20);
+  let previewHtml = '';
+  if (failing.length) {
+    previewHtml = `<div style="background:rgba(232,149,74,.07);border:1px solid rgba(232,149,74,.2);border-radius:6px;padding:.85rem 1.1rem;">
+      <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--warning);font-weight:700;margin-bottom:.5rem;">Will Receive Strikes (${failing.length})</div>
+      ${failing.map(b => `<div style="font-size:.82rem;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.04);">${esc(b.name)} <span style="color:var(--muted);">— ${b.hours}h logged</span>${b.strikes+1>=2?' <span style="color:var(--danger);font-size:.75rem;font-weight:700;">→ REPO</span>':''}</div>`).join('')}
+    </div>`;
+  } else {
+    previewHtml = `<div style="color:var(--accent2);font-size:.85rem;">✓ All businesses are meeting the 20hr requirement this week.</div>`;
+  }
+  document.getElementById('reset-preview').innerHTML = previewHtml;
+  openModal('modal-reset');
+}
+
+function confirmReset() {
+  state.businesses.forEach(b => {
+    if (b.hours < 20) b.strikes = Math.min(b.strikes + 1, 2);
+    b.hours = 0;
+  });
+  state.weekNum++;
+  saveState();
+  closeModal('modal-reset');
+  renderAll();
+}
+
+// Delete Modal
+function openDeleteModal(type, id) {
+  deleteTargetType = type;
+  deleteTargetId = id;
+  let name = '';
+  if (type === 'business') name = state.businesses.find(b => b.id === id)?.name || '';
+  else if (type === 'gang') name = state.gangs.find(g => g.id === id)?.name || '';
+  else if (type === 'member') name = state.members.find(m => m.id === id)?.name || '';
+  document.getElementById('delete-target-name').textContent = name;
+  openModal('modal-confirm-delete');
+}
+
+function confirmDelete() {
+  if (deleteTargetType === 'business') {
+    state.businesses = state.businesses.filter(b => b.id !== deleteTargetId);
+  } else if (deleteTargetType === 'gang') {
+    state.gangs = state.gangs.filter(g => g.id !== deleteTargetId);
+    state.members.forEach(m => { if (m.gangId === deleteTargetId) m.gangId = ''; });
+    state.businesses.forEach(b => { if (b.gangId === deleteTargetId) b.gangId = ''; });
+  } else if (deleteTargetType === 'member') {
+    state.members = state.members.filter(m => m.id !== deleteTargetId);
+  }
+  saveState();
+  closeModal('modal-confirm-delete');
+  renderAll();
+}
+
+// ─── CLEAR STRIKE ─────────────────────────────────────────────────────────────
+function clearStrike(bizId) {
+  const idx = state.businesses.findIndex(b => b.id === bizId);
+  if (idx >= 0 && state.businesses[idx].strikes > 0) {
+    state.businesses[idx].strikes--;
+    saveState();
+    renderAll();
+  }
+}
+
+// ─── EXPORT / IMPORT ──────────────────────────────────────────────────────────
+function exportData() {
+  const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `circuit-registry-week${state.weekNum}.json`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function importData(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    try {
+      const imported = JSON.parse(ev.target.result);
+      if (!Array.isArray(imported.businesses) || !Array.isArray(imported.gangs)) {
+        alert('Invalid registry file.');
+        return;
+      }
+      state = imported;
+      saveState();
+      renderAll();
+    } catch {
+      alert('Failed to parse file.');
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+// ─── EXPOSE FUNCTIONS TO HTML ONCLICK ATTRIBUTES ──────────────────────────────
+// type="module" scripts are sandboxed, so onclick handlers need window references
+Object.assign(window, {
+  showPage, openResetModal, confirmReset,
+  switchBizTab, renderBusinessTable,
+  openBusinessModal, saveBusiness,
+  openHoursModal, saveHours,
+  openGangModal, saveGang,
+  openMemberModal, saveMember, onMemberGangChange, onRankSelectChange,
+  openEditRanksModal, saveRanks,
+  openDeleteModal, confirmDelete,
+  clearStrike, exportData, importData,
+  closeModal, renderGangTable,
+});
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+onSnapshot(STATE_DOC, snapshot => {
+  if (snapshot.exists()) {
+    state = snapshot.data();
+  } else {
+    setDoc(STATE_DOC, state);
+  }
+  renderAll();
+}, err => {
+  console.error('Firestore connection error:', err);
+});
+</script>
+</body>
+</html>
