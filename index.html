@@ -507,6 +507,10 @@
       <select id="gang-filter" onchange="renderGangTable()" style="max-width:200px;">
         <option value="">All Gangs</option>
       </select>
+      <select id="member-sort" onchange="renderGangTable()" style="max-width:200px;">
+        <option value="name">Sort: Name A→Z</option>
+        <option value="gang-name">Sort: Gang → Name</option>
+      </select>
     </div>
 
     <div class="card" style="margin-bottom:1.5rem;">
@@ -931,7 +935,7 @@ function renderGangPage() {
     if (!state.gangs.length) {
       overviewTbody.innerHTML = `<tr><td colspan="5"><div class="empty-state"><div class="empty-icon">🤝</div><p>No gangs yet.</p></div></td></tr>`;
     } else {
-      overviewTbody.innerHTML = state.gangs.map(g => {
+      overviewTbody.innerHTML = [...state.gangs].sort((a,b) => a.name.localeCompare(b.name)).map(g => {
         const memberCount = state.members.filter(m => m.gangId === g.id).length;
         const ownedBiz = state.businesses.filter(b => b.gangId === g.id);
         const types = [...new Set(ownedBiz.map(b => typeLabel(b.type, b.customType)))].join(', ') || '—';
@@ -969,6 +973,17 @@ function renderGangTable() {
     }
     return true;
   });
+
+  const sortBy = document.getElementById('member-sort')?.value || 'name';
+  if (sortBy === 'gang-name') {
+    list.sort((a, b) => {
+      const ga = state.gangs.find(g => g.id === a.gangId)?.name || '';
+      const gb = state.gangs.find(g => g.id === b.gangId)?.name || '';
+      return ga.localeCompare(gb) || a.name.localeCompare(b.name);
+    });
+  } else {
+    list.sort((a, b) => a.name.localeCompare(b.name));
+  }
 
   const tbody = document.getElementById('gang-table-body');
   if (!tbody) return;
