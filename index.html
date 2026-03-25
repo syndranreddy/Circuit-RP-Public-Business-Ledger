@@ -509,7 +509,7 @@
       </select>
       <select id="member-sort" onchange="renderGangTable()" style="max-width:200px;">
         <option value="name">Sort: Name A→Z</option>
-        <option value="gang-name">Sort: Gang → Name</option>
+        <option value="gang-name">Sort: Gang → Rank → Name</option>
       </select>
     </div>
 
@@ -977,9 +977,18 @@ function renderGangTable() {
   const sortBy = document.getElementById('member-sort')?.value || 'name';
   if (sortBy === 'gang-name') {
     list.sort((a, b) => {
-      const ga = state.gangs.find(g => g.id === a.gangId)?.name || '';
-      const gb = state.gangs.find(g => g.id === b.gangId)?.name || '';
-      return ga.localeCompare(gb) || a.name.localeCompare(b.name);
+      const gangA = state.gangs.find(g => g.id === a.gangId);
+      const gangB = state.gangs.find(g => g.id === b.gangId);
+      const gangCmp = (gangA?.name || '').localeCompare(gangB?.name || '');
+      if (gangCmp !== 0) return gangCmp;
+      const ranksA = gangA?.ranks || [];
+      const ranksB = gangB?.ranks || [];
+      const rankIdxA = a.rank ? ranksA.indexOf(a.rank) : -1;
+      const rankIdxB = b.rank ? ranksB.indexOf(b.rank) : -1;
+      const rA = rankIdxA === -1 ? Infinity : rankIdxA;
+      const rB = rankIdxB === -1 ? Infinity : rankIdxB;
+      if (rA !== rB) return rA - rB;
+      return a.name.localeCompare(b.name);
     });
   } else {
     list.sort((a, b) => a.name.localeCompare(b.name));
