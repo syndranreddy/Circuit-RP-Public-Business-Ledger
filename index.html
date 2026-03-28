@@ -120,6 +120,8 @@
   .btn-sm { padding: 0.35rem 0.75rem; font-size: 0.78rem; }
   .btn-green { background: var(--accent2); color: #0a0b0d; }
   .btn-green:hover { background: #5af0b0; }
+  .btn-warning { background: var(--warning); color: #0a0b0d; }
+  .btn-warning:hover { background: #f0a85a; }
 
   /* STATS ROW */
   .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
@@ -908,6 +910,7 @@ function renderBusinessTable() {
           <button class="btn btn-ghost btn-sm" onclick="openHoursModal('${b.id}')">Log Hours</button>
           <button class="btn btn-ghost btn-sm" onclick="openBusinessModal('${b.id}')">Edit</button>
           ${b.strikes > 0 ? `<button class="btn btn-ghost btn-sm" onclick="clearStrike('${b.id}')" title="Remove one strike">−Strike</button>` : ''}
+          <button class="btn btn-warning btn-sm" onclick="repoBusiness('${b.id}')" title="Repo — clears owner, account ID, gang, and SID">Repo</button>
           <button class="btn btn-danger btn-sm" onclick="openDeleteModal('business','${b.id}')">✕</button>
         </div>
       </td>
@@ -1317,6 +1320,14 @@ function clearStrike(bizId) {
     saveState();
     renderAll();
   }
+}
+
+function repoBusiness(bizId) {
+  const idx = state.businesses.findIndex(b => b.id === bizId);
+  if (idx < 0) return;
+  state.businesses[idx] = { ...state.businesses[idx], ownerName: '', accountId: '', gangId: '', stateId: '' };
+  saveState();
+  renderAll();
 }
 
 // ─── EXPORT / IMPORT ──────────────────────────────────────────────────────────
