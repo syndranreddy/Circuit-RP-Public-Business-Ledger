@@ -122,6 +122,11 @@
   .btn-green:hover { background: #5af0b0; }
   .btn-warning { background: var(--warning); color: #0a0b0d; }
   .btn-warning:hover { background: #f0a85a; }
+  th.sortable { cursor: pointer; user-select: none; }
+  th.sortable:hover { color: var(--text); }
+  .sort-icon::after { content: ''; margin-left: 0.3em; opacity: 0.35; }
+  .sort-icon.asc::after { content: '▲'; opacity: 1; color: var(--accent); }
+  .sort-icon.desc::after { content: '▼'; opacity: 1; color: var(--accent); }
 
   /* STATS ROW */
   .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
@@ -470,16 +475,16 @@
 
     <div class="card">
       <table>
-        <thead>
+        <thead id="biz-thead">
           <tr>
-            <th>Business Name</th>
-            <th>Type</th>
-            <th>Owner Name</th>
+            <th class="sortable" onclick="setBizSort('name')">Business Name <span class="sort-icon" data-col="name"></span></th>
+            <th class="sortable" onclick="setBizSort('type')">Type <span class="sort-icon" data-col="type"></span></th>
+            <th class="sortable" onclick="setBizSort('ownerName')">Owner Name <span class="sort-icon" data-col="ownerName"></span></th>
             <th>Account ID</th>
             <th>State ID</th>
             <th>Gang</th>
-            <th>Hours (This Week)</th>
-            <th>Strikes</th>
+            <th class="sortable" onclick="setBizSort('hours')">Hours (This Week) <span class="sort-icon" data-col="hours"></span></th>
+            <th class="sortable" onclick="setBizSort('strikes')">Strikes <span class="sort-icon" data-col="strikes"></span></th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -758,6 +763,7 @@ let hoursTargetId = null;
 let deleteTargetType = null;
 let deleteTargetId = null;
 let bizTab = 'all';
+let bizSort = { col: 'name', dir: 'asc' };
 
 function saveState() {
   setDoc(STATE_DOC, state).catch(err => console.error('Save failed:', err));
@@ -870,6 +876,16 @@ function switchBizTab(tab) {
   renderBusinessTable();
 }
 
+function setBizSort(col) {
+  if (bizSort.col === col) {
+    bizSort.dir = bizSort.dir === 'asc' ? 'desc' : 'asc';
+  } else {
+    bizSort.col = col;
+    bizSort.dir = 'asc';
+  }
+  renderBusinessTable();
+}
+
 function renderBusinessTable() {
   const search = (document.getElementById('biz-search')?.value || '').toLowerCase();
   let list = state.businesses.filter(b => {
@@ -881,6 +897,21 @@ function renderBusinessTable() {
         (b.stateId || '').toLowerCase().includes(search);
     }
     return true;
+  });
+
+  list.sort((a, b) => {
+    let av = a[bizSort.col] ?? '';
+    let bv = b[bizSort.col] ?? '';
+    if (typeof av === 'string') av = av.toLowerCase();
+    if (typeof bv === 'string') bv = bv.toLowerCase();
+    if (av < bv) return bizSort.dir === 'asc' ? -1 : 1;
+    if (av > bv) return bizSort.dir === 'asc' ? 1 : -1;
+    return 0;
+  });
+
+  // update sort icons
+  document.querySelectorAll('.sort-icon').forEach(el => {
+    el.className = 'sort-icon' + (el.dataset.col === bizSort.col ? ' ' + bizSort.dir : '');
   });
 
   const tbody = document.getElementById('biz-table-body');
