@@ -1294,7 +1294,7 @@ function saveRanks() {
 
 // Reset Week Modal
 function openResetModal() {
-  const failing = state.businesses.filter(b => b.hours < 20);
+  const failing = state.businesses.filter(b => !b.exempt && b.hours < 20);
   let previewHtml = '';
   if (failing.length) {
     previewHtml = `<div style="background:rgba(232,149,74,.07);border:1px solid rgba(232,149,74,.2);border-radius:6px;padding:.85rem 1.1rem;">
