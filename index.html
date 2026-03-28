@@ -1325,7 +1325,7 @@ function clearStrike(bizId) {
 function repoBusiness(bizId) {
   const idx = state.businesses.findIndex(b => b.id === bizId);
   if (idx < 0) return;
-  state.businesses[idx] = { ...state.businesses[idx], ownerName: '', accountId: '', gangId: '', stateId: '' };
+  state.businesses[idx] = { ...state.businesses[idx], ownerName: '', accountId: '', gangId: '', stateId: '', hours: 0 };
   saveState();
   renderAll();
 }
