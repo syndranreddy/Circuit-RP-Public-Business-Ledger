@@ -605,6 +605,14 @@
       </div>
     </div>
     <div id="gang-type-error" class="error-msg">⚠ This gang already owns a business of this type.</div>
+    <hr style="border:none;border-top:1px solid var(--border);margin:0.5rem 0 1rem"/>
+    <div class="form-group" style="flex-direction:row;align-items:center;gap:0.75rem;">
+      <input type="checkbox" id="biz-exempt" style="width:16px;height:16px;accent-color:var(--accent);cursor:pointer;flex-shrink:0;"/>
+      <div>
+        <label for="biz-exempt" style="cursor:pointer;margin-bottom:0;">Exempt from hour requirements</label>
+        <div class="form-hint">This business will not receive strikes for missing hours during weekly reset.</div>
+      </div>
+    </div>
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeModal('modal-business')">Cancel</button>
       <button class="btn btn-primary" onclick="saveBusiness()">Save Business</button>
@@ -914,7 +922,7 @@ function renderBusinessTable() {
   }
   tbody.innerHTML = list.map(b => `
     <tr>
-      <td><strong>${esc(b.name)}</strong></td>
+      <td><strong>${esc(b.name)}</strong>${b.exempt ? ' <span class="badge badge-yellow">Exempt</span>' : ''}</td>
       <td><span class="badge badge-muted">${typeLabel(b.type, b.customType)}</span></td>
       <td>${esc(b.ownerName) || '—'}</td>
       <td><span class="mono">${esc(b.accountId) || '—'}</span></td>
@@ -1071,6 +1079,7 @@ function openBusinessModal(id = null) {
     document.getElementById('biz-gang').value = b.gangId || '';
     document.getElementById('biz-account-id').value = b.accountId || '';
     document.getElementById('biz-state-id').value = b.stateId || '';
+    document.getElementById('biz-exempt').checked = b.exempt || false;
     document.getElementById('biz-custom-wrap').style.display = b.type === 'other' ? 'block' : 'none';
   } else {
     document.getElementById('biz-name').value = '';
@@ -1080,6 +1089,7 @@ function openBusinessModal(id = null) {
     document.getElementById('biz-gang').value = '';
     document.getElementById('biz-account-id').value = '';
     document.getElementById('biz-state-id').value = '';
+    document.getElementById('biz-exempt').checked = false;
     document.getElementById('biz-custom-wrap').style.display = 'none';
   }
   openModal('modal-business');
@@ -1097,6 +1107,7 @@ function saveBusiness() {
   const gangId = document.getElementById('biz-gang').value;
   const accountId = document.getElementById('biz-account-id').value.trim();
   const stateId = document.getElementById('biz-state-id').value.trim();
+  const exempt = document.getElementById('biz-exempt').checked;
 
   if (!name) { alert('Business name is required.'); return; }
 
@@ -1113,9 +1124,9 @@ function saveBusiness() {
 
   if (editingBizId) {
     const idx = state.businesses.findIndex(b => b.id === editingBizId);
-    state.businesses[idx] = { ...state.businesses[idx], name, type, customType, ownerName, gangId, accountId, stateId };
+    state.businesses[idx] = { ...state.businesses[idx], name, type, customType, ownerName, gangId, accountId, stateId, exempt };
   } else {
-    state.businesses.push({ id: genId(), name, type, customType, ownerName, gangId, accountId, stateId, hours: 0, strikes: 0 });
+    state.businesses.push({ id: genId(), name, type, customType, ownerName, gangId, accountId, stateId, exempt, hours: 0, strikes: 0 });
   }
   saveState();
   closeModal('modal-business');
@@ -1299,7 +1310,7 @@ function openResetModal() {
 
 function confirmReset() {
   state.businesses.forEach(b => {
-    if (b.hours < 20) b.strikes = Math.min(b.strikes + 1, 2);
+    if (!b.exempt && b.hours < 20) b.strikes = Math.min(b.strikes + 1, 2);
     b.hours = 0;
   });
   state.weekNum++;
