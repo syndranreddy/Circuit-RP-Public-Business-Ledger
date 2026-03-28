@@ -479,7 +479,18 @@
     </div>
 
     <div class="card">
-      <table>
+      <table style="table-layout:fixed;width:100%;">
+        <colgroup>
+          <col style="width:14%"/>
+          <col style="width:10%"/>
+          <col style="width:11%"/>
+          <col style="width:9%"/>
+          <col style="width:7%"/>
+          <col style="width:8%"/>
+          <col style="width:13%"/>
+          <col style="width:8%"/>
+          <col style="width:20%"/>
+        </colgroup>
         <thead id="biz-thead">
           <tr>
             <th>Business Name</th>
@@ -921,7 +932,7 @@ function renderBusinessTable() {
   }
   tbody.innerHTML = list.map(b => `
     <tr>
-      <td><strong>${esc(b.name)}</strong>${b.exempt ? ' <span class="badge badge-yellow">Exempt</span>' : ''}</td>
+      <td style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"><strong>${esc(b.name)}</strong>${b.exempt ? ' <span class="badge badge-yellow">Exempt</span>' : ''}</td>
       <td><span class="badge badge-muted">${typeLabel(b.type, b.customType)}</span></td>
       <td>${esc(b.ownerName) || '—'}</td>
       <td><span class="mono">${esc(b.accountId) || '—'}</span></td>
@@ -936,8 +947,8 @@ function renderBusinessTable() {
         </div>
       </td>
       <td>
-        <div style="display:flex;gap:.4rem;">
-          <button class="btn btn-ghost btn-sm" onclick="openHoursModal('${b.id}')">Log Hours</button>
+        <div style="display:flex;gap:.3rem;flex-wrap:nowrap;">
+          <button class="btn btn-ghost btn-sm" onclick="openHoursModal('${b.id}')">Hours</button>
           <button class="btn btn-ghost btn-sm" onclick="openBusinessModal('${b.id}')">Edit</button>
           ${b.strikes < 2 ? `<button class="btn btn-ghost btn-sm" onclick="addStrike('${b.id}')" title="Add one strike">+Strike</button>` : ''}
           ${b.strikes > 0 ? `<button class="btn btn-ghost btn-sm" onclick="clearStrike('${b.id}')" title="Remove one strike">−Strike</button>` : ''}
