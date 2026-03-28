@@ -707,8 +707,7 @@
 <div class="modal-overlay" id="modal-reset">
   <div class="modal">
     <div class="modal-title">Reset Week</div>
-    <p class="confirm-text">This will finalize the current week. Businesses under <strong style="color:var(--text)">20 hours</strong> will receive a strike. Businesses with <strong style="color:var(--danger)">2 strikes</strong> will be flagged for repossession.</p>
-    <p class="confirm-text" style="margin-top:.75rem;">After reset, all hours return to <strong style="color:var(--text)">0</strong> for the new week.</p>
+    <p class="confirm-text">This will finalize the current week. All hours will return to <strong style="color:var(--text)">0</strong> for the new week. Strikes are managed manually.</p>
     <div id="reset-preview" style="margin-top:1rem;"></div>
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeModal('modal-reset')">Cancel</button>
@@ -940,6 +939,7 @@ function renderBusinessTable() {
         <div style="display:flex;gap:.4rem;">
           <button class="btn btn-ghost btn-sm" onclick="openHoursModal('${b.id}')">Log Hours</button>
           <button class="btn btn-ghost btn-sm" onclick="openBusinessModal('${b.id}')">Edit</button>
+          ${b.strikes < 2 ? `<button class="btn btn-ghost btn-sm" onclick="addStrike('${b.id}')" title="Add one strike">+Strike</button>` : ''}
           ${b.strikes > 0 ? `<button class="btn btn-ghost btn-sm" onclick="clearStrike('${b.id}')" title="Remove one strike">−Strike</button>` : ''}
           <button class="btn btn-warning btn-sm" onclick="repoBusiness('${b.id}')" title="Repo — clears owner, account ID, gang, and SID">Repo</button>
           <button class="btn btn-danger btn-sm" onclick="openDeleteModal('business','${b.id}')">✕</button>
@@ -1294,25 +1294,12 @@ function saveRanks() {
 
 // Reset Week Modal
 function openResetModal() {
-  const failing = state.businesses.filter(b => !b.exempt && b.hours < 20);
-  let previewHtml = '';
-  if (failing.length) {
-    previewHtml = `<div style="background:rgba(232,149,74,.07);border:1px solid rgba(232,149,74,.2);border-radius:6px;padding:.85rem 1.1rem;">
-      <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--warning);font-weight:700;margin-bottom:.5rem;">Will Receive Strikes (${failing.length})</div>
-      ${failing.map(b => `<div style="font-size:.82rem;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.04);">${esc(b.name)} <span style="color:var(--muted);">— ${b.hours}h logged</span>${b.strikes+1>=2?' <span style="color:var(--danger);font-size:.75rem;font-weight:700;">→ REPO</span>':''}</div>`).join('')}
-    </div>`;
-  } else {
-    previewHtml = `<div style="color:var(--accent2);font-size:.85rem;">✓ All businesses are meeting the 20hr requirement this week.</div>`;
-  }
-  document.getElementById('reset-preview').innerHTML = previewHtml;
+  document.getElementById('reset-preview').innerHTML = '';
   openModal('modal-reset');
 }
 
 function confirmReset() {
-  state.businesses.forEach(b => {
-    if (!b.exempt && b.hours < 20) b.strikes = Math.min(b.strikes + 1, 2);
-    b.hours = 0;
-  });
+  state.businesses.forEach(b => { b.hours = 0; });
   state.weekNum++;
   saveState();
   closeModal('modal-reset');
@@ -1347,6 +1334,15 @@ function confirmDelete() {
 }
 
 // ─── CLEAR STRIKE ─────────────────────────────────────────────────────────────
+function addStrike(bizId) {
+  const idx = state.businesses.findIndex(b => b.id === bizId);
+  if (idx >= 0 && state.businesses[idx].strikes < 2) {
+    state.businesses[idx].strikes++;
+    saveState();
+    renderAll();
+  }
+}
+
 function clearStrike(bizId) {
   const idx = state.businesses.findIndex(b => b.id === bizId);
   if (idx >= 0 && state.businesses[idx].strikes > 0) {
@@ -1407,7 +1403,7 @@ Object.assign(window, {
   openMemberModal, saveMember, onMemberGangChange, onRankSelectChange,
   openEditRanksModal, saveRanks,
   openDeleteModal, confirmDelete,
-  clearStrike, repoBusiness, exportData, importData,
+  addStrike, clearStrike, repoBusiness, exportData, importData,
   closeModal, renderGangTable,
 });
 
